@@ -1,4 +1,6 @@
 ## [Unreleased]
+
+## [0.1.16] - 2021-11-09
 ### Added
 - Initial release
 
@@ -18,7 +20,8 @@
 ### Added
 - Initial release
 
-[Unreleased]: https://github.com/codaamok/test123/compare/0.1.14..HEAD
+[Unreleased]: https://github.com/codaamok/test123/compare/0.1.16..HEAD
+[0.1.16]: https://github.com/codaamok/test123/compare/0.1.14..0.1.16
 [0.1.14]: https://github.com/codaamok/test123/compare/1.1.0..0.1.14
 [1.1.0]: https://github.com/codaamok/test123/compare/1.0.0..1.1.0
 [1.0.0]: https://github.com/codaamok/test123/tree/1.0.0
