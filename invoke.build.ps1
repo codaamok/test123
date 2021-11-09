@@ -185,14 +185,14 @@ task UpdateProjectRepo -If ($NewRelease) {
 
     $ManifestData = Import-PowerShellDataFile -Path $Script:ManifestFile
 
-    Write-Host (Get-Content $Script:ManifestFile)
-
+    # Instead of copying the manifest from the .\build directory, update it in place
+    # This enables me to keep FunctionsToExport = '*' for development. Therefore instead only update the important bits e.g. version and release notes    
     $UpdateModuleManifestSplat = @{
         Path          = "{0}\{1}\{1}.psd1" -f $BuildRoot, $Script:ModuleName
         ModuleVersion = $ManifestData.ModuleVersion
         ReleaseNotes  = $ManifestData.PrivateData.PSData.ReleaseNotes
     }
-
     Update-ModuleManifest @UpdateModuleManifestSplat
+
     $null = Test-ModuleManifest -Path $Script:ManifestFile
 }
