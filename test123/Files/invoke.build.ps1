@@ -22,7 +22,6 @@ param (
 task . ImportBuildModule,
     InitaliseBuildDirectory,
     Changelog,
-    GetVersionToBuild,
     UpdateChangeLog,
     CreateRootModule,
     CreateProcessScript,
@@ -91,24 +90,14 @@ task Changelog {
     Export-UnreleasedNotes -Path $BuildRoot\release\releasenotes.txt -ChangeLogData $Script:ChangeLogData -NewRelease $Script:NewRelease
 }
 
-# Synopsis: Determine version number to build with
+<# Synopsis: Determine version number to build with
 task GetVersionToBuild {
     $Params = @{
-        NewRelease = $Script:NewRelease
-    }
-
-    if ($Script:CommitMessage -match 'Version to build:') {
-        if ($Script:CommitMessage -match '^Version to build: (\d+\.\d+\.\d+)$') {
-            $Params["VersionToBuild"] = $Matches[1]
-        }
-        else {
-            throw "Unable to parse version number from commit message '$Script:CommitMessage'"
-        }
-    }
-    else {
-        $Params["ModuleName"]    = $Script:ModuleName
-        $Params["ManifestData"]  = Import-PowerShellDataFile -Path ("{0}\{1}\{1}.psd1" -f $BuildRoot, $Script:ModuleName)
-        $Params["ChangeLogData"] = $Script:ChangeLogData
+        ModuleName     = $Script:ModuleName
+        ManifestData   = Import-PowerShellDataFile -Path ("{0}\{1}\{1}.psd1" -f $BuildRoot, $Script:ModuleName)
+        NewRelease     = $Script:NewRelease
+        ChangeLogData  = $Script:ChangeLogData
+        VersionToBuild = $Script:Version
     }
 
     $Script:VersionToBuild = Get-BuildVersionNumber @Params
@@ -117,6 +106,7 @@ task GetVersionToBuild {
         "VersionToBuild" = $Script:VersionToBuild.ToString()
     }
 }
+#>
 
 # Synopsis: Update CHANGELOG.md (if building a new release with -NewRelease)
 task UpdateChangeLog -If ($Script:NewRelease) {
@@ -148,7 +138,7 @@ task UpdateModuleManifest {
         Path              = $Script:ManifestFile
         RootModule        = (Split-Path $Script:RootModule -Leaf)
         FunctionsToExport = Get-PublicFunctions -Path $BuildRoot\$Script:ModuleName\Public
-        ModuleVersion     = $Script:VersionToBuild
+        ModuleVersion     = $Script:Version
         ReleaseNotes      = Get-Content $BuildRoot\release\releasenotes.txt
     }
 
@@ -179,7 +169,7 @@ task UpdateModuleManifest {
 
 # Synopsis: Create archive of the module
 task CreateArchive {
-    $ReleaseAsset = "{0}_{1}.zip" -f $Script:ModuleName, $Script:VersionToBuild
+    $ReleaseAsset = "{0}_{1}.zip" -f $Script:ModuleName, $Script:Version
     Compress-Archive -Path $BuildRoot\build\$Script:ModuleName\* -DestinationPath $BuildRoot\release\$ReleaseAsset -Force
 }
 

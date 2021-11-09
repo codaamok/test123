@@ -2,6 +2,8 @@ mode: Mainline
 branches: 
   feature:
     increment: Minor
+  develop:
+    tag: preview
 ignore:
   sha: []
 merge-message-formats: {}
