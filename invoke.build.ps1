@@ -185,6 +185,8 @@ task UpdateProjectRepo -If ($NewRelease) {
 
     $ManifestData = Import-PowerShellDataFile -Path $Script:ManifestFile
 
+    Write-Host $ManifestData
+
     $UpdateModuleManifestSplat = @{
         Path          = "{0}\{1}\{1}.psd1" -f $BuildRoot, $Script:ModuleName
         ModuleVersion = $ManifestData.ModuleVersion
