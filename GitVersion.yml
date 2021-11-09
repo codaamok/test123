@@ -1,4 +1,5 @@
 mode: Mainline
+no-bump-message: '\+semver:\s?(none|skip)|^Released\s\d\.\d\.\d'
 branches: 
   feature:
     increment: Minor
