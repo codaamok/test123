@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+### Added
+- Initial release
 ## [0.2.0] - 2021-11-09
 ### Added
 - Initial release

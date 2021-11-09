@@ -1,6 +1,8 @@
 mode: Mainline
 no-bump-message: '\+semver:\s?(none|skip)|^Released\s\d\.\d\.\d'
 branches: 
+  main:
+    prevent-increment-of-merged-branch-version: false
   feature:
     increment: Minor
   develop:
