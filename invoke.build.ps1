@@ -9,7 +9,7 @@ param (
     [String]$Author,
 
     [Parameter()]
-    [String]$CommitMessage,
+    [String]$Version,
 
     [Parameter()]
     [Bool]$UpdateDocs = $false,
@@ -22,7 +22,6 @@ param (
 task . ImportBuildModule,
     InitaliseBuildDirectory,
     Changelog,
-    GetVersionToBuild,
     UpdateChangeLog,
     CreateRootModule,
     CreateProcessScript,
@@ -34,8 +33,8 @@ task . ImportBuildModule,
 # Synopsis: Install dependent build modules
 task InstallDependentModules {
     $Modules = "PlatyPS","ChangelogManagement"
-    if ($Script:ModuleName -ne "codaamok.build") {
-        $Module += "codaamok.build"
+    if ($Script:ModuleName -ne "test123") {
+        $Module += "test123"
     }
     Install-BuildModules -Module $Modules
 }
@@ -45,7 +44,6 @@ task SetGitHubActionEnvironmentVariables {
     New-BuildEnvironmentVariable -Platform "GitHubActions" -Variable @{
         "GH_USERNAME"    = $Author
         "GH_PROJECTNAME" = $ModuleName
-        "GH_COMMITMSG"   = $CommitMessage
     }
 }
 
@@ -54,14 +52,14 @@ task PublishModule {
     Publish-Module -Path $BuildRoot\build\$ModuleName -NuGetApiKey $env:PSGALLERY_API_KEY -ErrorAction "Stop" -Force
 }
 
-# Synopsis: Import the codaamok.build module
+# Synopsis: Import the test123 module
 task ImportBuildModule {
-    if ($Script:ModuleName -eq "codaamok.build") {
-        # This is to use module for building codaamok.build itself
-        Import-Module .\codaamok.build\codaamok.build.psd1
+    if ($Script:ModuleName -eq "test123") {
+        # This is to use module for building test123 itself
+        Import-Module .\test123\test123.psd1
     }
     else {
-        Import-Module "codaamok.build"
+        Import-Module "test123"
     }
 }
 
@@ -92,24 +90,14 @@ task Changelog {
     Export-UnreleasedNotes -Path $BuildRoot\release\releasenotes.txt -ChangeLogData $Script:ChangeLogData -NewRelease $Script:NewRelease
 }
 
-# Synopsis: Determine version number to build with
+<# Synopsis: Determine version number to build with
 task GetVersionToBuild {
     $Params = @{
-        NewRelease = $Script:NewRelease
-    }
-
-    if ($Script:CommitMessage -match 'Version to build:') {
-        if ($Script:CommitMessage -match '^Version to build: (\d+\.\d+\.\d+)$') {
-            $Params["VersionToBuild"] = $Matches[1]
-        }
-        else {
-            throw "Unable to parse version number from commit message '$Script:CommitMessage'"
-        }
-    }
-    else {
-        $Params["ModuleName"]    = $Script:ModuleName
-        $Params["ManifestData"]  = Import-PowerShellDataFile -Path ("{0}\{1}\{1}.psd1" -f $BuildRoot, $Script:ModuleName)
-        $Params["ChangeLogData"] = $Script:ChangeLogData
+        ModuleName     = $Script:ModuleName
+        ManifestData   = Import-PowerShellDataFile -Path ("{0}\{1}\{1}.psd1" -f $BuildRoot, $Script:ModuleName)
+        NewRelease     = $Script:NewRelease
+        ChangeLogData  = $Script:ChangeLogData
+        VersionToBuild = $Script:Version
     }
 
     $Script:VersionToBuild = Get-BuildVersionNumber @Params
@@ -118,6 +106,7 @@ task GetVersionToBuild {
         "VersionToBuild" = $Script:VersionToBuild.ToString()
     }
 }
+#>
 
 # Synopsis: Update CHANGELOG.md (if building a new release with -NewRelease)
 task UpdateChangeLog -If ($Script:NewRelease) {
@@ -149,7 +138,7 @@ task UpdateModuleManifest {
         Path              = $Script:ManifestFile
         RootModule        = (Split-Path $Script:RootModule -Leaf)
         FunctionsToExport = Get-PublicFunctions -Path $BuildRoot\$Script:ModuleName\Public
-        ModuleVersion     = $Script:VersionToBuild
+        ModuleVersion     = $Script:Version
         ReleaseNotes      = Get-Content $BuildRoot\release\releasenotes.txt
     }
 
@@ -180,7 +169,7 @@ task UpdateModuleManifest {
 
 # Synopsis: Create archive of the module
 task CreateArchive {
-    $ReleaseAsset = "{0}_{1}.zip" -f $Script:ModuleName, $Script:VersionToBuild
+    $ReleaseAsset = "{0}_{1}.zip" -f $Script:ModuleName, $Script:Version
     Compress-Archive -Path $BuildRoot\build\$Script:ModuleName\* -DestinationPath $BuildRoot\release\$ReleaseAsset -Force
 }
 
