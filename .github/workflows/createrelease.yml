@@ -1,0 +1,112 @@
+name: "Create GitHub release"
+
+on: 
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  job-main:
+    name: main
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2.3.1
+        with:
+          fetch-depth: 0
+
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v0.9.10
+        with:
+          versionSpec: '5.x'
+
+      - name: Determine Version
+        uses: gittools/actions/gitversion/execute@v0.9.10
+        with:
+          useConfigFile: true
+
+      - name: Display GitVersion outputs
+        run: |
+          echo "Major: ${{ steps.gitversion.outputs.major }}"
+          echo "Minor: ${{ steps.gitversion.outputs.minor }}"
+          echo "Patch: ${{ steps.gitversion.outputs.patch }}"
+          echo "PreReleaseTag: ${{ steps.gitversion.outputs.preReleaseTag }}"
+          echo "PreReleaseTagWithDash: ${{ steps.gitversion.outputs.preReleaseTagWithDash }}"
+          echo "PreReleaseLabel: ${{ steps.gitversion.outputs.preReleaseLabel }}"
+          echo "PreReleaseNumber: ${{ steps.gitversion.outputs.preReleaseNumber }}"
+          echo "WeightedPreReleaseNumber: ${{ steps.gitversion.outputs.weightedPreReleaseNumber }}"
+          echo "BuildMetaData: ${{ steps.gitversion.outputs.buildMetaData }}"
+          echo "BuildMetaDataPadded: ${{ steps.gitversion.outputs.buildMetaDataPadded }}"
+          echo "FullBuildMetaData: ${{ steps.gitversion.outputs.fullBuildMetaData }}"
+          echo "MajorMinorPatch: ${{ steps.gitversion.outputs.majorMinorPatch }}"
+          echo "SemVer: ${{ steps.gitversion.outputs.semVer }}"
+          echo "LegacySemVer: ${{ steps.gitversion.outputs.legacySemVer }}"
+          echo "LegacySemVerPadded: ${{ steps.gitversion.outputs.legacySemVerPadded }}"
+          echo "AssemblySemVer: ${{ steps.gitversion.outputs.assemblySemVer }}"
+          echo "AssemblySemFileVer: ${{ steps.gitversion.outputs.assemblySemFileVer }}"
+          echo "FullSemVer: ${{ steps.gitversion.outputs.fullSemVer }}"
+          echo "InformationalVersion: ${{ steps.gitversion.outputs.informationalVersion }}"
+          echo "BranchName: ${{ steps.gitversion.outputs.branchName }}"
+          echo "EscapedBranchName: ${{ steps.gitversion.outputs.escapedBranchName }}"
+          echo "Sha: ${{ steps.gitversion.outputs.sha }}"
+          echo "ShortSha: ${{ steps.gitversion.outputs.shortSha }}"
+          echo "NuGetVersionV2: ${{ steps.gitversion.outputs.nuGetVersionV2 }}"
+          echo "NuGetVersion: ${{ steps.gitversion.outputs.nuGetVersion }}"
+          echo "NuGetPreReleaseTagV2: ${{ steps.gitversion.outputs.nuGetPreReleaseTagV2 }}"
+          echo "NuGetPreReleaseTag: ${{ steps.gitversion.outputs.nuGetPreReleaseTag }}"
+          echo "VersionSourceSha: ${{ steps.gitversion.outputs.versionSourceSha }}"
+          echo "CommitsSinceVersionSource: ${{ steps.gitversion.outputs.commitsSinceVersionSource }}"
+          echo "CommitsSinceVersionSourcePadded: ${{ steps.gitversion.outputs.commitsSinceVersionSourcePadded }}"
+          echo "UncommittedChanges: ${{ steps.gitversion.outputs.uncommittedChanges }}"
+          echo "CommitDate: ${{ steps.gitversion.outputs.commitDate }}"
+
+      - name: Install codaamok.build and dependent modules, and set environment variables
+        run: |
+          Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
+          Install-Module "InvokeBuild" -Force
+          $Username, $ProjectName = $env:GITHUB_REPOSITORY -split "/"
+          Invoke-Build -ModuleName $ProjectName -Author $Username -Task "ImportBuildModule","InstallDependentModules","SetGitHubActionEnvironmentVariables"
+        shell: pwsh
+        
+      - name: Build
+        run: Invoke-Build -ModuleName $env:GH_PROJECTNAME -Author $env:GH_USERNAME -Version $env:GitVersion_SemVer -NewRelease $true
+        shell: pwsh
+        with:
+          GitVersion_SemVer: steps.gitversion.outputs.SemVer
+
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.gitversion.outputs.SemVer }}
+          release_name: Release ${{ steps.gitversion.outputs.SemVer }}
+          body_path: release/releasenotes.txt
+          draft: true
+          prerelease: false
+
+      - name: Upload release asset
+        id: upload_release_asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url:  ${{ steps.create_release.outputs.upload_url }}
+          asset_path: release/${{ env.GH_PROJECTNAME }}_${{ steps.gitversion.outputs.SemVer }}.zip
+          asset_name: ${{ env.GH_PROJECTNAME }}_${{ steps.gitversion.outputs.SemVer }}.zip
+          asset_content_type: application/zip
+
+      - name: Commit CHANGELOG.md and module manifest
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+          git add CHANGELOG.md ${GH_PROJECTNAME}/${GH_PROJECTNAME}.psd1 docs
+          git commit -m "Released ${steps.gitversion.outputs.SemVer}"
+      
+      - name: Push commit
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
