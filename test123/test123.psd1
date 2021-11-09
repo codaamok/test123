@@ -12,7 +12,7 @@
 RootModule = 'test123.psm1'
 
 # Version number of this module.
-ModuleVersion = '0.1.16'
+ModuleVersion = '0.1.18'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
