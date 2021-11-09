@@ -1,5 +1,6 @@
 ## [Unreleased]
-
+### Added
+- Initial release
 ## [0.1.16] - 2021-11-09
 ### Added
 - Initial release
