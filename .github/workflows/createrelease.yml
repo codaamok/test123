@@ -28,7 +28,7 @@ jobs:
         with:
           useConfigFile: true
 
-      - name: Install codaamok.build and dependent modules, and set environment variables
+      - name: Install test123 and dependent modules, and set environment variables
         run: |
           Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
           Install-Module "InvokeBuild" -Force

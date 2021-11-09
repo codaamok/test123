@@ -20,7 +20,7 @@ function Get-BuildCommands {
 
     $Commands = @{}
 
-    Get-Command -Module "codaamok.build" | ForEach-Object {
+    Get-Command -Module "test123" | ForEach-Object {
         $Help = Get-Help -Name $_.Name
         $Synopsis = $Help.Synopsis
 

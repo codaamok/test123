@@ -15,9 +15,9 @@ function Update-BuildFiles {
         [String]$DestinationPath
     )
 
-    $Module = Get-Module "codaamok.build"
+    $Module = Get-Module "test123"
 
-    # Check for files within the ModuleBase directory aswell the Files subfolder in case this command is being used during development of codaamok.build itself
+    # Check for files within the ModuleBase directory aswell the Files subfolder in case this command is being used during development of test123 itself
     @(
         [PSCustomObject]@{
             File = "{0}\invoke.build.ps1" -f $Module.ModuleBase

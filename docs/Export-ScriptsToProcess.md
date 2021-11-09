@@ -1,6 +1,6 @@
 ---
-external help file: codaamok.build-help.xml
-Module Name: codaamok.build
+external help file: test123-help.xml
+Module Name: test123
 online version:
 schema: 2.0.0
 ---

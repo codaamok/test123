@@ -7,7 +7,7 @@
             "label": "Build",
             "type": "process",
             "command": "pwsh",
-            "args": ["-noprofile","-command","Import-Module", "./codaamok.build/codaamok.build.psd1", ";", "Invoke-Build","-File","./invoke.build.ps1","-Author","'codaamok'","-ModuleName","'codaamok.build'"],
+            "args": ["-noprofile","-command","Import-Module", "./test123/test123.psd1", ";", "Invoke-Build","-File","./invoke.build.ps1","-Author","'codaamok'","-ModuleName","'test123'"],
             "group": "build",
             "presentation": {
                 "echo": true,
@@ -23,7 +23,7 @@
             "label": "Build (with docs)",
             "type": "process",
             "command": "pwsh",
-            "args": ["-noprofile","-command","Invoke-Build","-File","./invoke.build.ps1","-Author","'codaamok'","-ModuleName","'codaamok.build'","-UpdateDocs"],
+            "args": ["-noprofile","-command","Invoke-Build","-File","./invoke.build.ps1","-Author","'codaamok'","-ModuleName","'test123'","-UpdateDocs"],
             "group": {
                 "kind": "build",
                 "isDefault": true
