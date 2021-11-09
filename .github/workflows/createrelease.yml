@@ -67,13 +67,13 @@ jobs:
           Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
           Install-Module "InvokeBuild" -Force
           $Username, $ProjectName = $env:GITHUB_REPOSITORY -split "/"
-          Invoke-Build -ModuleName $ProjectName -Author $Username -Task "ImportBuildModule","InstallDependentModules","SetGitHubActionEnvironmentVariables"
+          Invoke-Build -ModuleName $ProjectName -Author $Username -Task "InstallDependentModules","ImportBuildModule","SetGitHubActionEnvironmentVariables"
         shell: pwsh
         
       - name: Build
         run: Invoke-Build -ModuleName $env:GH_PROJECTNAME -Author $env:GH_USERNAME -Version $env:GitVersion_SemVer -NewRelease $true
         shell: pwsh
-        with:
+        env:
           GitVersion_SemVer: steps.gitversion.outputs.SemVer
 
       - name: Create release

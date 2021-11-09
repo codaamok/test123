@@ -33,8 +33,8 @@ task . ImportBuildModule,
 # Synopsis: Install dependent build modules
 task InstallDependentModules {
     $Modules = "PlatyPS","ChangelogManagement"
-    if ($Script:ModuleName -ne "codaamok.build") {
-        $Module += "codaamok.build"
+    if ($Script:ModuleName -ne "test123") {
+        $Module += "test123"
     }
     Install-BuildModules -Module $Modules
 }
@@ -52,14 +52,14 @@ task PublishModule {
     Publish-Module -Path $BuildRoot\build\$ModuleName -NuGetApiKey $env:PSGALLERY_API_KEY -ErrorAction "Stop" -Force
 }
 
-# Synopsis: Import the codaamok.build module
+# Synopsis: Import the test123 module
 task ImportBuildModule {
-    if ($Script:ModuleName -eq "codaamok.build") {
-        # This is to use module for building codaamok.build itself
-        Import-Module .\codaamok.build\codaamok.build.psd1
+    if ($Script:ModuleName -eq "test123") {
+        # This is to use module for building test123 itself
+        Import-Module .\test123\test123.psd1
     }
     else {
-        Import-Module "codaamok.build"
+        Import-Module "test123"
     }
 }
 
